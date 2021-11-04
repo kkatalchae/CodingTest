@@ -1,3 +1,5 @@
+package Level1;
+
 import java.util.Scanner;
 
 public class 직사각형_별찍기 {
