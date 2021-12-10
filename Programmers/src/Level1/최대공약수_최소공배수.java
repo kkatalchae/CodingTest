@@ -19,7 +19,7 @@ public class 최대공약수_최소공배수 {
         if(num2 == 0)
             return num1;
         else
-            return getGCD(num1, num1 % num2);
+            return getGCD(num2, num1 % num2);
     }
 
     static int getLCM(int num1, int num2){
@@ -29,8 +29,8 @@ public class 최대공약수_최소공배수 {
     public static void main(String[] args) {
         int[] answer = new int[2];
 
-        answer[0] = getGCD(1, 10);
-        answer[1] = getLCM(1, 10);
+        answer[0] = getGCD(8, 14);
+        answer[1] = getLCM(8, 14);
 
         System.out.println(Arrays.toString(answer));
 
