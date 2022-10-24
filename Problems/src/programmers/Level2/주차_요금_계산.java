@@ -76,12 +76,17 @@ public class 주차_요금_계산 {
             - 주차장에 이미 있는 차량(차량번호가 같은 차량)이 다시 입차되는 경우
      */
 
+
+    // solution ( 나의 풀이, 0.47 ~ 28.11 ms 66 ~ 86 mb )
     private static int[] solution(int[] fees, String[] records) {
 
+        // 차량번호별 기록을 저장하기 위한 Map < 차량번호, ArrayList< String 시간 >
         Map<String, ArrayList<String>> parkingTime = new HashMap<>();
 
+        // records 는 시간, 차량 번호, 입차 / 출차 가 합쳐진 String 으로 되어있기 때문에 나눠서 사용하기 위한 배열
         String[] recordInfos;
 
+        // records 배열을 돌면서 각각의 기록에 대해 로직 수행
         for (String record : records) {
 
             recordInfos = record.split(" ");
@@ -89,20 +94,25 @@ public class 주차_요금_계산 {
             String carNum = recordInfos[1];
             String recordType = recordInfos[2];
 
+            // Map 객체에 차량번호에 대한 기록이 아무것도 없을 시 ( 처음 입차했을 경우 )
             if (!parkingTime.containsKey(carNum)) {
+                // 기본적으로 입차하면 출차 시간을 23:59분으로 세팅한다.
                 parkingTime.put(carNum, new ArrayList<String>(Arrays.asList(time, "23:59")));
             }
-
-            else if (parkingTime.containsKey(carNum) && recordType.equals("OUT") ) {
+            // 출차하는 경우
+            else if (parkingTime.containsKey(carNum) && recordType.equals("OUT")) {
+                // 출차할 경우, 기본적으로 세팅되어 있는 출차 시간을 수정해준다.
+                // 두번째 출차인데 첫번째 출차 기록이 바뀌면 안되기 때문에 size() -1 에 해당하는 시간을 변경
                 parkingTime.get(carNum).set(parkingTime.get(carNum).size() - 1, time);
             }
-
+            // 동일한 차량 번호의 차량이 두 차례 이상 입차하는 경우
             else if (parkingTime.containsKey(carNum) && recordType.equals("IN")) {
                 parkingTime.get(carNum).add(time);
                 parkingTime.get(carNum).add("23:59");
             }
         }
 
+        // ArrayList 에 기록이 있는 차량 번호를 담아둔 후, 정렬
         List<String> cars = new ArrayList<>();
 
         for (String car : parkingTime.keySet()) {
@@ -111,27 +121,33 @@ public class 주차_요금_계산 {
 
         Collections.sort(cars);
 
+        // 차량별 요금을 담을 배열
         int[] answer = new int[cars.size()];
 
         int index = 0;
 
+        // Map 에서 차량번호에 해당하는 기록 ( ArrayList ) 를 가져와서 주차한 시간을 구하고, 요금을 구한다.
         for (String car : cars) {
             answer[index++] = getFee(fees, getTime(parkingTime.get(car)));
         }
-        System.out.println(parkingTime);
+
         return answer;
     }
 
-    private static int getTime(ArrayList<String> parkingTimes) {
+    // 기록을 저장해둔 리스트를 이용해서 주차한 시간을 구해주는 getTime 메소드
+    public static int getTime(ArrayList<String> parkingTimes) {
 
+        // 출차 시간 - 입차 시간
         int time = 0;
 
+        // 기록은 String 형으로 되어 있기 때문에 ":" 를 기준으로 분리한 후, 분으로 치환해준 뒤 차이를 구해준다.
         String[] times;
 
-        for (int i = 0; i < parkingTimes.size(); i++){
+        for (int i = 0; i < parkingTimes.size(); i++) {
 
             times = parkingTimes.get(i).split(":");
 
+            // ArrayList < 0, 2, 4 ... ( 짝수 ) : 입차 기록 , 1, 3, 5, 7 ... ( 홀수 ) : 출차 기록
             if (i % 2 == 0) {
                 time -= Integer.parseInt(times[0]) * 60 + Integer.parseInt(times[1]);
             }
@@ -141,13 +157,13 @@ public class 주차_요금_계산 {
             }
         }
 
-        System.out.println(time);
         return time;
 
     }
 
-    private static int getFee(int[] fees, int time) {
+    public static int getFee(int[] fees, int time) {
 
+        // Math.ceil 메소드를 사용할 때 필요한 인자는 double 형이기 때문에 요금표의 요소들을 double 변수에 담아준다.
         double baseTime = fees[0];
         double baseFee = fees[1];
         double perTime = fees[2];
@@ -156,10 +172,13 @@ public class 주차_요금_계산 {
         if (time < baseTime) {
             return (int) baseFee;
         } else {
+            // 기준 시간을 초과한
             return (int) (baseFee + Math.ceil(((time - baseTime) / perTime)) * perFee);
         }
 
     }
+
+
 
     public static void main(String[] args) {
         int[] fees = {180, 5000, 10, 600};
